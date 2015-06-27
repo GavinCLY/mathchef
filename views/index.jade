@@ -1,0 +1,51 @@
+extends layout
+
+block head
+
+block content
+  select#prod
+    option(value="0") --请选择--
+    each prod in prods
+      option(value="#{prod.id}") #{prod.name}
+  input(name="amount", value="#{prods[0].base_amount}")
+  button#calculate 计算
+  #result
+block js
+  script(type="text/template", id="prodTpl").
+    <ul>
+        <% _.each(prod.ProdCombs, function(prodComb){ %>
+            <li>
+                <%=prodComb.SemiProd.name%> - <%=prod.rate * prodComb.semi_prod_rate %>
+                <ul>
+                    <% _.each(prodComb.SemiProd.SemiProdCombs, function(semiProdComb){ %>
+                        <li>
+                            <%=semiProdComb.Material.name %> - <%=prod.rate * prodComb.semi_prod_rate * semiProdComb.material_rate/prodComb.SemiProd.base_amount %>
+                        </li>
+                    <% })%>
+                </ul>
+            </li>
+        <% })%>
+    </ul>
+  script.
+    var currProd;
+
+    $('#prod').on('change', function(){
+        var prodId = parseInt(this.value);
+        if(!prodId) return;
+        $.ajax({
+            url : '/prod/' + prodId,
+            type : 'get',
+            dataType : 'json',
+            success : function(prod) {
+                currProd = prod;
+                currProd.prod.rate = parseInt($('input[name="amount"]').val()) / currProd.prod.base_amount
+                console.log(prod);
+                $('#result').html(_.template($('#prodTpl').html())(currProd));
+            }
+        })
+    });
+
+    $('#calculate').on('click', function() {
+        currProd.prod.rate = parseInt($('input[name="amount"]').val()) / currProd.prod.base_amount
+        $('#result').html(_.template($('#prodTpl').html())(currProd));
+    });

@@ -1,0 +1,38 @@
+extends layout
+
+block head
+
+block content
+  form#materialForm(action="/material", method="post")
+    input(type="text", name="name", value="")
+    input(type="submit", value="创建原材料")
+  form#semiProdForm(action="/semiProd", method="post")
+    input(type="text", name="name", value="")
+    input(type="text", name="base_amount", value="")
+    input(type="submit", value="创建半成品")
+  form#prodForm(action="/prod", method="post")
+    input(type="text", name="name", value="")
+    input(type="text", name="base_amount", value="")
+    input(type="submit", value="创建成品")
+
+block js
+  script.
+    // 代理所有的submit，变成异步提交
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+        var $form = $(this).closest('form');
+        $.ajax({
+            url : $form.attr('action'),
+            type : $form.attr('method'),
+            data : {
+                name : $form.find('input[name="name"]').val(),
+                base_amount : $form.find('input[name="base_amount"]').val()
+            },
+            dataType : 'json',
+            success : function(data) {
+                console.log(data);
+                $form[0].reset();
+            }
+        })
+    });
+
