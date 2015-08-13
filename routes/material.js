@@ -1,26 +1,42 @@
 /**
  * Created by GavinCLY on 6/20/15.
  */
-var db = require('../model');
-var Promise = require('bluebird');
+var Material = require('../model/mongodb/index').Material;
 
 exports.create = function(req, res, next) {
     var body = req.body;
 
-    db.Material
-        .create({ name : body.name })
-        .then(function(data) {
-            res.json({});
+    Material
+        .create({ name : body.name }, function(err) {
+            res.json({
+                err : err
+            });
         });
 };
 
-// 产品列表
-exports.list = function(req, res, next) {
-    db.Material
-        .findAll({})
-        .then(function(materials) {
-            res.json({
-                materials : materials
-            });
+exports.remove = function(req, res, next) {
+    var id = req.params.id;
+    Material.remove(id, function(err) {
+        res.json({
+            err : err
         });
+    });
+};
+
+exports.update = function(req, res) {
+    var id = req.params.id;
+    Material.update(id, req.body, function(err) {
+        res.json({
+            err : err
+        });
+    });
+};
+
+exports.query = function(req, res) {
+    Material.query(req.query, function(err, materials) {
+        res.json({
+            err : err,
+            materials : materials
+        });
+    });
 };

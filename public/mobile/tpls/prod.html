@@ -1,0 +1,8 @@
+<div class="scrollable">
+    <input type="search" class="form-control scrollable-header needsclick ng-scope" placeholder="搜索菜谱" ng-model="prodQuery">
+    <div class="scrollable-content overthrow">
+        <div class="list-group">
+            <a ui-sref="app.prodDetail({ id : prod._id })" ng-repeat="prod in prods | filter : { name : prodQuery }" class="list-group-item">{{ prod.name }}</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+#materialList .editable-controls input[type="text"],
+#semiProdList .editable-controls input[type="text"] {
+    width: 135px;
+}
+
+#materialList .editable-controls button[type="button"],
+#semiProdList .editable-controls button[type="button"] {
+    display: none;
+}
+.dd-extra {
+    position: absolute; top: 0px; right: 0px;
+    padding: 2px 10px;
+}
+.dd-extra > span  {
+    font-size: 20px; line-height: 1.7; padding-right: 10px;
+}
+
+#prodList .dd-item {
+    position: relative;
+    margin-left: 20px;
+}
+
+#prodList i.glyphicon.glyphicon-remove{
+    position: absolute; top: 15px; left: -20px;
+}

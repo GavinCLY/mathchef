@@ -3,22 +3,49 @@ extends layout
 block head
 
 block content
-  form#materialForm(action="/material", method="post")
-    input(type="text", name="name", value="")
-    input(type="submit", value="创建原材料")
-  form#semiProdForm(action="/semiProd", method="post")
-    input(type="text", name="name", value="")
-    input(type="text", name="base_amount", value="")
-    input(type="submit", value="创建半成品")
+  form#materialForm.form-horizontal(action="/material", method="post")
+    .form-group
+      .col-sm-3
+        input.form-control(type="text", name="name", value="")
+      .col-sm-3
+        .btn.btn-primary 创建原材料
+  form#semiProdForm.form-horizontal(action="/semiProd", method="post")
+    .form-group
+      .col-sm-3
+        input.form-control(type="text", name="name", value="")
+      .col-sm-3
+        input.form-control(type="text", name="base_amount", value="")
+      .col-sm-3
+        .btn.btn-primary 创建半成品
   form#prodForm(action="/prod", method="post")
     input(type="text", name="name", value="")
     input(type="text", name="base_amount", value="")
     input(type="submit", value="创建成品")
 
 block js
+  script(type="text/template", id="formGroupTpl").
+    <div class="form-group">
+        <div class="col-sm-5">
+          <i class="glyphicon glyphicon-plus"></i>
+          <select class="form-control" name="item">
+              <% _.each(list, function(item){ %>
+                  <option value="<%=item.id%>"><%=item.name%></option>
+              <% }) %>
+          </select>
+        </div>
+        <div class="col-sm-3">
+            <input class="form-control" name="rate" />
+        </div>
+        <div class="col-sm-1">
+            <select class="form-control" name="unit">
+                <option value="g"></option>
+                <option value="p"></option>
+            </select>
+        </div>
+    </div>
   script.
     // 代理所有的submit，变成异步提交
-    $('form').on('submit', function(e) {
+    $('form .btn-primary').on('click', function(e) {
         e.preventDefault();
         var $form = $(this).closest('form');
         $.ajax({
@@ -30,9 +57,52 @@ block js
             },
             dataType : 'json',
             success : function(data) {
-                console.log(data);
-                $form[0].reset();
+                if($form.attr('id') != 'materialForm') {
+                    createSemiProdComb($form);
+                } else {
+                    $form[0].reset();
+                }
+                $form.append('<input type="hidden" name="comb_id" value="' + data.id + '" />');
             }
         })
     });
 
+    // 增加 原材料行
+    function createSemiProdComb($form) {
+        // 获取原材料list
+        $.ajax({
+            url : '/materials',
+            type : 'get',
+            dataType : 'json',
+            success : function(data) {
+                $form.append(_.template($('#formGroupTpl').html())({ list : data.materials }));
+            }
+        })
+    }
+
+    // 保存关系
+    function saveSemiProdComb(material_id, material_rate, unit) {
+        $.ajax({
+            url : '/semiProd/comb',
+            type : 'post',
+            data : {
+                semi_prod_id : $('#semiProdForm input[name="comb_id"]').val(),
+                material_id : material_id,
+                material_rate : material_rate,
+                unit : unit
+            },
+            dataType : 'json',
+            success : function(data) {
+                createSemiProdComb($('#semiProdForm'));
+            }
+        })
+    }
+
+    $('#semiProdForm').delegate('i.glyphicon-plus', 'click', function(){
+        var $row = $(this).closest('.form-group');
+        saveSemiProdComb(
+            $row.find('select[name="item"]').val(),
+            $row.find('input[name="rate"]').val(),
+            $row.find('select[name="unit"]').val()
+        );
+    });

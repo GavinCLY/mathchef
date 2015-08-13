@@ -1,0 +1,26 @@
+<!-- Sidebars -->
+<div class="sidebar sidebar-left"></div>
+<div class="sidebar sidebar-right"><!-- ... --></div>
+
+<div class="app">
+    <div class="navbar navbar-app navbar-absolute-top">
+        <div class="navbar-brand navbar-brand-center">
+            <span>MathChef</span>
+        </div>
+        <div class="btn-group pull-left">
+            <div ui-toggle="uiSidebarLeft" class="btn sidebar-toggle">
+                <a ui-sref="app.prod">
+                    <i class="fa fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- App body -->
+
+    <div class='app-body'>
+        <div class='app-content'>
+            <ng-view ui-view></ng-view>
+        </div>
+    </div>
+</div><!-- ~ .app -->

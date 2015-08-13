@@ -1,0 +1,32 @@
+<div class="scrollable">
+    <div class="scrollable-content overthrow">
+        <div class="section">
+            <input type="search" class="form-control scrollable-header needsclick ng-scope" placeholder="需要制作的分量" ng-model="amount"/>
+            <div class="dd" id="prodList">
+                <ol class="dd-list">
+                    <li class="dd-item" ng-repeat="semiProd in prod.semiProds" data-id="semi_{{semiProd._id}}">
+                        <div class="dd-nodrag dd-name">
+                            {{ semiProd.name }}
+                        </div>
+                        <div class="dd-extra">
+                            <span editable-text="semiProd.amount">{{semiProd.amount * (amount / prod.amount) | number : 0 }}</span>
+                            <span editable-text="semiProd.unit">{{semiProd.unit || 'g'}}</span>
+                        </div>
+                        <ol class="dd-list">
+                            <li class="dd-item" ng-repeat="material in semiProd.materials" data-id="m_{{material._id}}">
+                                <i class="glyphicon glyphicon-remove" ng-click="removeMaterial(semiProd._id, material._id)"></i>
+                                <div class="dd-nodrag">
+                                    <span>{{ material.name }}</span>
+                                </div>
+                                <div class="dd-extra">
+                                    <span editable-text="material.amount">{{material.amount * (amount / prod.amount) | number : 0 }}</span>
+                                    <span editable-text="material.unit">{{material.unit || 'g'}}</span>
+                                </div>
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,8 @@
 /**
  * Created by GavinCLY on 6/20/15.
  */
-var db = require('../model');
-var Promise = require('bluebird');
+var Prod = require('../model/mongodb/index').Prod;
+var _ = require('underscore');
 
 /**
  * 创建 成品 数据
@@ -13,43 +13,47 @@ var Promise = require('bluebird');
 exports.create = function(req, res, next) {
     var body = req.body;
 
-    db.Prod
-        .create({
-            name : body.name,
-            base_amount : body.base_amount
-        })
-        .then(function(data) {
-            res.json(data);
+    Prod
+        .create(body, function(prod) {
+            res.json({
+                id : prod.get('id')
+            });
         });
 };
 
-/**
- * 更新 成品 数据
- * @param req
- * @param res
- * @param next
- */
-exports.update = function(req, res, next) {
-    var body = req.body;
-    db.Prod
-        .update({
-            name : body.name,
-            base_amount : body.base_amount
-        }, { id : req.params.id })
-        .then(function(data) {
-            res.json(data);
-        })
-}
+exports.remove = function(req, res, next) {
+    var id = req.params.id;
+    Prod.remove(id, function(err) {
+        res.json({
+            err : err
+        });
+    });
+};
 
-/**
- * 创建 成品 -- 半成品 数据
- * @param req
- * @param res
- * @param next
- */
+exports.update = function(req, res) {
+    var id = req.params.id;
+    Prod.update(id, req.body, function(err) {
+        res.json({
+            err : err
+        });
+    });
+};
+
+exports.query = function(req, res) {
+    Prod.query(req.query, function(err, prods) {
+        res.json({
+            err : err,
+            prods : prods
+        });
+    });
+};
+
+
+/*
+
 exports.createComb = function(req, res, next) {
     var body = req.body;
-    db.ProdComb
+    ProdComb
         .create({
             prod_id : body.prod_id,
             semi_prod_id : body.semi_prod_id,
@@ -61,14 +65,8 @@ exports.createComb = function(req, res, next) {
         });
 };
 
-/**
- * 删除ProdComb 数据
- * @param req
- * @param res
- * @param next
- */
 exports.removeComb = function(req, res, next) {
-    db.ProdComb
+    ProdComb
         .destroy({ id : req.params.id })
         .then(function(resp) {
             res.json(resp);
@@ -77,7 +75,7 @@ exports.removeComb = function(req, res, next) {
 
 // 产品列表
 exports.list = function(req, res, next) {
-    db.Prod
+    Prod
         .findAll({})
         .then(function(prods) {
             res.render('index', {
@@ -89,16 +87,16 @@ exports.list = function(req, res, next) {
 // 查找单个产品
 exports.find = function(req, res, next) {
     var prodId = req.params.id;
-    db.Prod
+    Prod
         .find({
             where : { id : prodId },
             include : [{
-                model : db.ProdComb,
+                model : ProdComb,
                 include : [{
-                    model : db.SemiProd,
+                    model : SemiProd,
                     include : [{
-                        model : db.SemiProdComb,
-                        include : [db.Material]
+                        model : SemiProdComb,
+                        include : [Material]
                     }]
                 }]
             }]
@@ -108,4 +106,30 @@ exports.find = function(req, res, next) {
                 prod : prod
             });
         });
-}
+};
+
+// 查询
+exports.query = function(req, res, next) {
+    var params = req.params;
+
+    Prod
+        .findAll({
+            where : params
+        })
+        .then(function(prods) {
+            res.json({
+                prods : prods
+            })
+        });
+};
+
+//  更新 整个
+exports.updateEntity = function(req, res, next) {
+    var prodId = req.params.id, prod = req.body;
+    var newSemiProd
+    // 创建material， 创建半成品，创建成品
+    _.each(prod.ProdCombs, function(prodComb) {
+
+    });
+};
+*/

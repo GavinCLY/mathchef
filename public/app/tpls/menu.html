@@ -1,0 +1,152 @@
+<div class="hbox hbox-auto-xs bg-light">
+    <!-- 菜谱列表 -->
+    <div class="col w-lg lt b-r">
+        <div class="vbox">
+            <div class="wrapper">
+                <a href="" class="pull-right btn btn-sm btn-info m-t-n-xs" ng-click="addProd()">新增</a>
+                <div class="h4">菜谱</div>
+            </div>
+            <div class="wrapper b-t m-t-xxs">
+                <div class="input-group">
+                    <span class="input-group-addon input-sm"><i class="fa fa-search"></i></span>
+                    <input type="text" class="form-control input-sm ng-pristine ng-valid ng-touched" placeholder="查询" ng-model="prodQuery">
+                </div>
+            </div>
+            <div class="row-row">
+                <div class="cell scrollable hover" >
+                    <div class="cell-inner">
+                        <div class="padder">
+                            <div class="list-group">
+                                <a ng-repeat="prod in prods | filter : { name : prodQuery }" ng-class="{true: 'b-l-success', false: 'b-l-warning'}[!!prod._id]" class="list-group-item b-l-{{}} b-l-3x hover-anchor" ng-click="selectProd(prod)">
+                                    <span class="block text-ellipsis ng-binding">{{prod.name}}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 菜谱区 -->
+    <div class="col">
+        <div class="vbox">
+            <div class="wrapper bg-light lt b-b">
+                <span editable-text="currProd.name" onbeforesave="saveProd({name:$data})">{{ currProd.name }}</span>
+                <span class="text-muted">创建于:</span> <span class="ng-binding">{{currProd.createdAt | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+                <div class="pull-right" style="width: 100px; margin-top: -5px;">
+                    <div class="input-group pull-right">
+                        <input type="text" class="form-control input-sm ng-pristine ng-valid ng-touched ng-untouched" placeholder="请输入分量，e.g 10" ng-model="currProd.amount">
+                        <span class="input-group-addon input-sm">克/g</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row-row">
+                <div class="cell">
+                    <div class="cell-inner" style="height: 100%;">
+                        <div class="wrapper-sm" style="padding-bottom: 50px;">
+                            <div class="dd" nestable data-change="nestableChange" data-target="prodList" id="prodList">
+                                <ol class="dd-list">
+                                    <li class="dd-item" ng-if="currProd.semiProds.length == 0">
+                                        <div class="dd-nodrag">将材料拖拽至此区域</div>
+                                    </li>
+                                    <li class="dd-item" ng-if="currProd.semiProds.length > 0" ng-repeat="semiProd in currProd.semiProds" data-id="semi_{{semiProd._id}}">
+                                        <i class="glyphicon glyphicon-remove" ng-click="removeSemiProd(semiProd._id)"></i>
+                                        <button data-action="collapse" type="button" style="display: block;">Collapse</button>
+                                        <button data-action="expand" type="button" style="display: none;">Expand</button>
+                                        <div class="dd-nodrag dd-name">
+                                            {{ semiProd.name }}
+                                        </div>
+                                        <div class="dd-extra">
+                                            <span editable-text="semiProd.amount">{{semiProd.amount || 0}}</span>
+                                            <span editable-text="semiProd.unit">{{semiProd.unit || 'g'}}</span>
+                                        </div>
+                                        <ol class="dd-list">
+                                            <li class="dd-item" ng-repeat="material in semiProd.materials" data-id="m_{{material._id}}">
+                                                <i class="glyphicon glyphicon-remove" ng-click="removeMaterial(semiProd._id, material._id)"></i>
+                                                <div class="dd-nodrag">
+                                                    <span>{{ material.name }}</span>
+                                                </div>
+                                                <div class="dd-extra">
+                                                    <span editable-text="material.amount">{{material.amount || 0}}</span>
+                                                    <span editable-text="material.unit">{{material.unit || 'g'}}</span>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wrapper b-t">
+                <a href="" class="btn btn-sm btn-primary btn-addon" ng-click="updateProd(currProd._id, currProd)">
+                    <i class="fa fa-save fa-fw m-r-xs"></i>
+                    保存
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- 半成品 原材料 选择区-->
+    <div class="col w-md bg-white-only b-l bg-auto no-border-xs">
+        <tabset class="nav-tabs-alt" justified="true">
+            <tab>
+                <tab-heading>
+                    <div class="h5">半成品</div>
+                </tab-heading>
+                <div class="wrapper-md">
+                    <div class="input-group">
+                        <span class="input-group-addon input-sm"><i class="fa fa-search"></i></span>
+                        <input type="text" class="form-control input-sm ng-pristine ng-valid ng-touched ng-untouched" placeholder="查询" ng-model="semiQuery">
+                    </div>
+                    <div nestable data-target="prodList" class="dd" id="semiProdList">
+                        <ol class="dd-list">
+                            <li class="dd-item">
+                                <dd class="dd-nodrag text-center">
+                                    <span editable-text="newSemiProd" onbeforesave="createSemiProd($data)">新增</span>
+                                </dd>
+                            </li>
+                            <li class="dd-item dd-collapsed dd-copy" ng-repeat="semi in semiProds | filter : { name : semiQuery }" data-id="semi_{{semi._id}}">
+                                <button data-action="collapse" type="button" style="display: none;">Collapse</button>
+                                <button data-action="expand" type="button" style="display: block;">Expand</button>
+                                <div class="dd-handle">
+                                    {{ semi.name }}
+                                </div>
+                                <ol class="dd-list" ng-hide="semi.materials.length < 1">
+                                    <li class="dd-item" data-id="semi_{{material._id}}" ng-repeat="material in semi.materials">
+                                        <div class="dd-nodrag">
+                                            <span>{{ material.name }}</span>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </tab>
+            <tab>
+                <tab-heading>
+                    <div class="h5">原材料</div>
+                </tab-heading>
+                <div class="wrapper-md">
+                    <div class="input-group">
+                        <span class="input-group-addon input-sm"><i class="fa fa-search"></i></span>
+                        <input type="text" class="form-control input-sm ng-pristine ng-valid ng-touched ng-untouched" placeholder="查询" ng-model="materialQuery">
+                    </div>
+                    <div nestable class="dd" data-target="prodList" id="materialList">
+                        <ol class="dd-list">
+                            <li class="dd-item">
+                                <dd class="dd-nodrag text-center">
+                                    <span editable-text="newMaterial" onbeforesave="createMaterial($data)">新增</span>
+                                </dd>
+                            </li>
+                            <li class="dd-item dd-copy" ng-repeat="m in materials | filter : { name : materialQuery }" data-id="m_{{m._id}}">
+                                <div class="dd-handle dd-copy">{{ m.name }}</div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </tab>
+        </tabset>
+    </div>
+</div>
